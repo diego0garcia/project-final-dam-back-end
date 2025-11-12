@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 from pydantic import BaseModel
 
-router123 = APIRouter(
+router = APIRouter(
     prefix="/users",
     tags=["Users"] #Esto es para la documentacion
 )
