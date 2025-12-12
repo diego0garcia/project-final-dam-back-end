@@ -43,7 +43,7 @@ def get_all():
             return users
         
         
-def get_user_by_id(id: int):
+def get_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             sql = "SELECT * FROM users WHERE id = ?"
