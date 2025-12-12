@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.models import UserBase,UserDb,UserIn,UserLoginIn,UserOut
 from app.database import UserDb
 from app.auth.auth import create_access_token, verify_password, oauth2_scheme, TokenData
-from app.database import insert_user, get_user_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user
+from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user
 
 router = APIRouter(
     prefix="/users",
@@ -73,7 +73,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.get("/{id}/", status_code=status.HTTP_201_CREATED)
 async def get_user_by_id(id: int):
-    user = get_user_by_id(id)
+    user = get_by_id(id)
     
     if user is None:
         raise HTTPException(
@@ -134,4 +134,4 @@ async def delete_user_by_id(id: int):
             detail = "User not already exists"
         )
     
-    return True
+    return result
