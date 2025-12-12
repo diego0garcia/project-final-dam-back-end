@@ -5,7 +5,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.models import UserBase,UserDb,UserIn,UserLoginIn,UserOut
 from app.database import UserDb
 from app.auth.auth import create_access_token, verify_password, oauth2_scheme, TokenData
-from app.database import insert_user, get_user_by_username
+from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user
+
 router = APIRouter(
     prefix="/users",
     tags=["Users"] #Esto es para la documentacion
@@ -72,20 +73,65 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.get("/{id}/", status_code=status.HTTP_201_CREATED)
 async def get_user_by_id(id: int):
-    pass
+    user = get_by_id(id)
+    
+    if user is None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "User not already exists"
+        )
+    
+    return user
+
+@router.get("/username/{username}/", status_code=status.HTTP_201_CREATED)
+async def get_user_by_name(username: str):
+    user = get_user_by_username(username)
+    
+    if user is None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "User not already exists"
+        )
+    
+    return user
 
 
 @router.get("/",response_model=list[UserOut],status_code=status.HTTP_200_OK)
-async def get_all_users(token: str = Depends(oauth2_scheme)):#authorization: str | None = Header()):
-    data: TokenData = decode_token(token)
+#async def get_all_users(token: str = Depends(oauth2_scheme)):#authorization: str | None = Header()):
+async def get_all_users():
+    users = []
+    users = get_all()
      
-    if data.username not in [u.username for u in users]:
-      raise HTTPException(
+    if not users:
+        raise HTTPException(
           status_code=status.HTTP_403_FORBIDDEN,
           detail="Forbidden"
-      )  
+        )  
     
-    return [
-        UserOut(id=UserDb.id, name=userDB.name, username=UserDb.username, email=UserDb.email, tlf=UserDb.tlf)
-        for userDB in users
-    ]
+    return users
+    
+#Modify
+@router.put("/username/modify/{id}/", status_code=status.HTTP_201_CREATED)
+async def get_user_by_name(id:int, name:str = None, username:str = None, email:str = None, tlf:str = None, password:str = None):
+    user = modify_user(id, name, username, email, tlf, password)
+    
+    if user is None:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "User not already exists"
+        )
+    
+    return user
+
+#Delete
+@router.delete("/{id}")
+async def delete_user_by_id(id: int):
+    result = delete_user_by_id(id)
+    
+    if result == 0:
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "User not already exists"
+        )
+    
+    return result

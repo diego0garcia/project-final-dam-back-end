@@ -1,6 +1,9 @@
 from app.models import UserDb
 import mariadb
 
+from app.models import UserDb
+
+
 db_config = {
     "host": "myapidb",
     "port": 3306,
@@ -8,6 +11,8 @@ db_config = {
     "password": "myapi",
     "database": "myapi"
 }
+
+
 
 def insert_user(user: UserDb):
     with mariadb.connect(**db_config) as conn:
