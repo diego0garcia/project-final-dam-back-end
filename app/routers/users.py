@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.models import UserBase,UserDb,UserIn,UserLoginIn,UserOut
 from app.database import UserDb
 from app.auth.auth import create_access_token, verify_password, oauth2_scheme, TokenData
-from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user
+from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user, check_if_exists, get_id
 
 router = APIRouter(
     prefix="/users",
@@ -17,23 +17,25 @@ users: list[UserDb] = []
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.post("/signup/", status_code=status.HTTP_201_CREATED)
 async def created_user(userIn: UserIn):
-    usersFound = [u for u in users if u.username == userIn.username]
-    if usersFound:
+    
+    if check_if_exists(userIn.username) == True:
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
             detail = "Username already exists"
         )
     
-    insert_user(
-        UserDb(
-            id = len(users) + 1,
-            username = userIn.username,
+    userNew = UserDb(
+        id = int(get_id()) + 1,
+            username=userIn.username,
             name=userIn.name,
-            email = userIn.email,
-            tlf = userIn.tlf,
-            password = userIn.password
-        )
+            email=userIn.email,
+            tlf=userIn.tlf,
+            password=userIn.password
     )
+    
+    insert_user(userNew)
+    
+    return userNew
     
 
 @router.post("/login/", status_code=status.HTTP_200_OK)
@@ -111,7 +113,7 @@ async def get_all_users():
     return users
     
 #Modify
-@router.put("/username/modify/{id}/", status_code=status.HTTP_201_CREATED)
+@router.put("/{id}/", status_code=status.HTTP_201_CREATED)
 async def get_user_by_name(id:int, name:str = None, username:str = None, email:str = None, tlf:str = None, password:str = None):
     user = modify_user(id, name, username, email, tlf, password)
     
@@ -135,3 +137,5 @@ async def delete_user_by_id(id: int):
         )
     
     return result
+
+#User if is superadmin can create other user

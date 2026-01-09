@@ -19,7 +19,7 @@ class UserOut(BaseModel):
     email: str
     tlf: int
     
-    
+
 class UserDb(UserIn):
     id: int
 
