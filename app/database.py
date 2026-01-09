@@ -23,7 +23,7 @@ def insert_user(user: UserDb):
 def get_all():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM users"
+            sql = "SELECT id, name, username, email, tlf, password FROM users "
             cursor.execute(sql)
             rows = cursor.fetchall()
             
@@ -31,8 +31,8 @@ def get_all():
             for row in rows:    
                 user = UserDb(
                     id = row[0],
-                    username = row[1],
-                    name=row[2],
+                    name=row[1],
+                    username = row[2],
                     email = row[3],
                     tlf = row[4],
                     password = row[5]
@@ -46,7 +46,7 @@ def get_all():
 def get_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM users WHERE id = ?"
+            sql = "SELECT id, name, username, email, tlf, password FROM users WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -77,7 +77,7 @@ def delete_user_by_id(id: int):
 def get_user_by_username(username: str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM users WHERE username = ?"
+            sql = "SELECT id, name, username, email, tlf, password FROM users WHERE username = ?"
             values = (username,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -99,7 +99,7 @@ def modify_user(id:int, name:str = None, username:str = None, email:str = None, 
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             
-            sql = "SELECT * FROM users WHERE id = ?"
+            sql = "SELECT id, name, username, email, tlf, password FROM users WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
