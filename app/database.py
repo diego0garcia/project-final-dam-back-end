@@ -11,6 +11,27 @@ db_config = {
     "database": "myapi"
 }
 
+def check_if_exists(username:str):
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT id FROM users WHERE username = ?"
+            values = (username,)
+            cursor.execute(sql, values)
+            response = cursor.fetchall()
+            
+            if response is "0":
+                return False
+            
+            return True
+    
+def get_id():
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT count(*) FROM users"
+            cursor.execute(sql,)
+            rows = cursor.fetchone()
+            
+            return rows[0]
 
 def insert_user(user: UserDb):
     with mariadb.connect(**db_config) as conn:
@@ -46,7 +67,8 @@ def get_all():
 def get_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, name, username, email, tlf, password FROM users WHERE id = ?"
+
+            sql = "SELECT id, username, name, email, tlf, password FROM users WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -54,12 +76,12 @@ def get_by_id(id: int):
                 return None
             
             user = UserDb(
-                id = row[0],
-                username = row[1],
+                id=row[0],
+                username=row[1],
                 name=row[2],
-                email = row[3],
-                tlf = row[4],
-                password = row[5]
+                email=row[3],
+                tlf=row[4],
+                password=row[5]
             )
             return user
         
