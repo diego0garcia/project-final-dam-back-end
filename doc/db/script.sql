@@ -1,15 +1,17 @@
 CREATE TABLE IF NOT EXISTS usuario(
-dni VARCHAR(9) NOT NULL PRIMARY KEY,
-username VARCHAR(100) NOT NULL UNIKE,
-nombre VARCHAR(100) NOT NULL,
-email VARCHAR(100),
-tlf VARCHAR(9) NOT NULL
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    dni VARCHAR(9) NOT NULL,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    tlf INT(9) NOT NULL
 );
 
 CREATE TABLE alumno(
     nia INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
-    tlf VARCHAR(20),
+    tlf INT(9) NOT NULL,
     gmail VARCHAR(100),
     curso VARCHAR(50),
     PRIMARY KEY (nia)
@@ -71,7 +73,7 @@ descripcion VARCHAR(500) NOT NULL,
 CONSTRAINT fk_amonestacion_id_notificacion FOREIGN KEY (id_notificacion) REFERENCES notificacion(id) ON DELETE CASCADE
 );
 
-CREATE TABLE profesorg (
+CREATE TABLE profesor(
     dni_usuario VARCHAR(9) PRIMARY KEY,
     dpto VARCHAR(100),
     CONSTRAINT fk_profesor_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE

@@ -6,6 +6,7 @@ class UserBase(BaseModel):
 
 
 class UserIn(UserBase):
+    dni: str
     name: str
     email: str
     tlf: int
@@ -17,6 +18,7 @@ class UserDb(UserIn):
     
 class UserOut(BaseModel):
     id: int
+    dni: str
     username: str
     name: str
     email: str
