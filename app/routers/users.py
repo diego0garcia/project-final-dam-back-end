@@ -103,23 +103,25 @@ async def get_all_users():
     return users
     
 #Modify
-@router.put("/{id}/", status_code=status.HTTP_201_CREATED)
-async def get_user_by_name(id:int, name:str = None, username:str = None, email:str = None, tlf:str = None, password:str = None):
+@router.put("/{id}/", status_code=status.HTTP_200_OK)
+async def update_user(id: int, dni:str = None, name:str = None, username:str = None, email:str = None, tlf:int = None, password:str = None):
+    
     if password:
         password = get_hash_password(password)
-    user = modify_user(id, name, username, email, tlf, password)
+    user = modify_user(id, dni, name, username, email, tlf, password)
     
     if user is None:
         raise HTTPException(
-            status_code = status.HTTP_403_FORBIDDEN,
-            detail = "User not already exists"
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "User not found"
         )
     
     return user
 
 #Delete
 @router.delete("/{id}")
-async def delete_user_by_id(id: int, token: str = Depends(oauth2_scheme)):
+async def delete_user(id: int, token: str = Depends(oauth2_scheme)):
+    
     result = delete_user_by_id(id)
     
     if result == 0:

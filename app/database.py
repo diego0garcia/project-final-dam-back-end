@@ -14,7 +14,7 @@ db_config = {
 def check_if_exists(username:str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id FROM users WHERE username = ?"
+            sql = "SELECT id FROM usuario WHERE username = ?"
             values = (username,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -27,7 +27,7 @@ def check_if_exists(username:str):
 def get_id():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT count(*) FROM users"
+            sql = "SELECT count(*) FROM usuario"
             cursor.execute(sql,)
             rows = cursor.fetchone()
             
@@ -36,8 +36,8 @@ def get_id():
 def insert_user(user: UserIn):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "Insert into users (name, username, email, tlf, password) values (?, ?, ?, ?, ?)"
-            values = (user.name, user.username, user.email, user.tlf, user.password)
+            sql = "Insert into usuario (dni, username, password, nombre, email, tlf) values (?, ?, ?, ?, ?, ?)"
+            values = (user.dni, user.username, user.password, user.name, user.email, user.tlf)
             cursor.execute(sql, values)
             conn.commit()
             
@@ -45,7 +45,7 @@ def insert_user(user: UserIn):
 def get_all():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM users"
+            sql = "SELECT * FROM usuario"
             cursor.execute(sql)
             rows = cursor.fetchall()
             
@@ -53,13 +53,13 @@ def get_all():
             for row in rows:    
                 user = UserDb(
                     id = row[0],
-                    username = row[1],
-                    name=row[2],
-                    email = row[3],
-                    tlf = row[4],
-                    password = row[5]
+                    dni = row[1],
+                    username = row[2],
+                    password = row[3],
+                    name=row[4],
+                    email = row[5],
+                    tlf = row[6]
                 )
-                
                 users.append(user)
                 
             return users
@@ -68,7 +68,7 @@ def get_all():
 def get_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, username, name, email, tlf, password FROM users WHERE id = ?"
+            sql = "SELECT id, dni, username, password, nombre, email, tlf FROM usuario WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -76,12 +76,13 @@ def get_by_id(id: int):
                 return None
             
             user = UserDb(
-                id=row[0],
-                username=row[1],
-                name=row[2],
-                email=row[3],
-                tlf=row[4],
-                password=row[5]
+                id = row[0],
+                dni = row[1],
+                username = row[2],
+                password = row[3],
+                name=row[4],
+                email = row[5],
+                tlf = row[6]
             )
             return user
         
@@ -89,7 +90,7 @@ def get_by_id(id: int):
 def delete_user_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "DELETE FROM users WHERE id = ?"
+            sql = "DELETE FROM usuario WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             conn.commit()
@@ -99,7 +100,7 @@ def delete_user_by_id(id: int):
 def get_user_by_username(username: str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM users WHERE username = ?"
+            sql = "SELECT * FROM usuario WHERE username = ?"
             values = (username,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -108,46 +109,40 @@ def get_user_by_username(username: str):
             
             user = UserDb(
                 id = row[0],
-                username = row[1],
-                name=row[2],
-                email = row[3],
-                tlf = row[4],
-                password = row[5]
+                dni = row[1],
+                username = row[2],
+                password = row[3],
+                name=row[4],
+                email = row[5],
+                tlf = row[6]
             )
             return user
         
 
-def modify_user(id:int, name:str = None, username:str = None, email:str = None, tlf:str = None, password:str = None):
+def modify_user(id:int, dni:str = None, name:str = None, username:str = None, email:str = None, tlf:int = None, password:str = None):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             
-            sql = "SELECT * FROM users WHERE id = ?"
+            sql = "SELECT * FROM usuario WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
-            if row is None:
-                return None
             
-            new_name = name if name is not None else row[1]
-            new_username = username if username is not None else row[2]
-            new_email = email if email is not None else row[3]
-            new_tlf = tlf if tlf is not None else row[4]
-            new_password = password if password is not None else row[5]
+            if row is None: return None
             
-            sql = "UPDATE users SET username = ?, name = ?, email = ?, tlf = ?, password = ? WHERE id = ?"
-            values = (new_username, new_name, new_email, new_tlf, new_password, id)
+            new_dni = dni if dni is not None else row[0]
+            new_username = username if username is not None else row[1]
+            new_password = password if password is not None else row[2]
+            new_name = name if name is not None else row[3]
+            new_email = email if email is not None else row[4]
+            new_tlf = tlf if tlf is not None else row[5]
+            
+            sql = "UPDATE usuario SET dni = ?, username = ?, password = ?, nombre = ?, email = ?, tlf = ? WHERE id = ?"
+            values = (new_dni, new_username, new_password, new_name, new_email, new_tlf, id)
             cursor.execute(sql, values)
             conn.commit()
             
-            user = UserDb(
-                id = id,
-                username = new_username,
-                name=new_name,
-                email = new_email,
-                tlf = new_tlf,
-                password = new_password
-            )
-            return user
+            return get_by_id(id)
             
                   
 #users: list[UserDb] = [UserDb(id=1,name="Alice",username="alice",email="alice@gmail.com",tlf=7658364593,password="$2b$12$9DAIvp9W0ls6hY3mE.x.5elr0VsUgOpkFpQ3rp/4XOTPAckgaWztu"),UserDb(id=2,name="Bob",username="bob",email="alice@gmail.com",tlf=7658364593,password="$2b$12$qs8F6B3JpINiXDAjhN6cYe9zTuHAE2xoeQ8NNvFtpCzIjg.iFzq3C")]
