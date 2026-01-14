@@ -9,7 +9,10 @@ class UserIn(UserBase):
     name: str
     email: str
     tlf: int
-    password: str
+    
+    
+class UserDb(UserIn):
+    id: int
     
     
 class UserOut(BaseModel):
@@ -18,13 +21,8 @@ class UserOut(BaseModel):
     name: str
     email: str
     tlf: int
-    
-
-class UserDb(UserIn):
-    id: int
 
 
 #Es como un alias de UserBase pq esta vacio
 class UserLoginIn(UserBase):
     pass
- 

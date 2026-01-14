@@ -1,6 +1,6 @@
 from app.models import UserDb
 import mariadb
-from app.models import UserDb
+from app.models import UserDb, UserIn
 
 
 db_config = {
@@ -17,9 +17,9 @@ def check_if_exists(username:str):
             sql = "SELECT id FROM users WHERE username = ?"
             values = (username,)
             cursor.execute(sql, values)
-            response = cursor.fetchall()
+            row = cursor.fetchone()
             
-            if response is "0":
+            if not row:
                 return False
             
             return True
@@ -33,12 +33,13 @@ def get_id():
             
             return rows[0]
 
-def insert_user(user: UserDb):
+def insert_user(user: UserIn):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "Insert into users (id, name, username, email, tlf, password) values (?, ?, ?, ?, ?, ?)"
-            values = (user.id, user.name, user.username, user.email, user.tlf, user.password)
+            sql = "Insert into users (name, username, email, tlf, password) values (?, ?, ?, ?, ?)"
+            values = (user.name, user.username, user.email, user.tlf, user.password)
             cursor.execute(sql, values)
+            conn.commit()
             
     
 def get_all():
@@ -136,6 +137,7 @@ def modify_user(id:int, name:str = None, username:str = None, email:str = None, 
             sql = "UPDATE users SET username = ?, name = ?, email = ?, tlf = ?, password = ? WHERE id = ?"
             values = (new_username, new_name, new_email, new_tlf, new_password, id)
             cursor.execute(sql, values)
+            conn.commit()
             
             user = UserDb(
                 id = id,

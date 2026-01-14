@@ -4,7 +4,7 @@ from app.auth.auth import Token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models import UserBase,UserDb,UserIn,UserLoginIn,UserOut
 from app.database import UserDb
-from app.auth.auth import create_access_token, verify_password, oauth2_scheme, TokenData
+from app.auth.auth import create_access_token, verify_password, oauth2_scheme, get_hash_password
 from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user, check_if_exists, get_id
 
 router = APIRouter(
@@ -16,30 +16,21 @@ users: list[UserDb] = []
 
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.post("/signup/", status_code=status.HTTP_201_CREATED)
-async def created_user(userIn: UserIn):
+async def sign_up_user(userIn: UserIn):
     
-    if check_if_exists(userIn.username) == True:
+    if check_if_exists(userIn.username):
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
             detail = "Username already exists"
         )
     
-    userNew = UserDb(
-        id = int(get_id()) + 1,
-            username=userIn.username,
-            name=userIn.name,
-            email=userIn.email,
-            tlf=userIn.tlf,
-            password=userIn.password
-    )
-    
-    insert_user(userNew)
-    
-    return userNew
-    
+    userIn.password = get_hash_password(userIn.password)
+    insert_user(userIn)
+
 
 @router.post("/login/", status_code=status.HTTP_200_OK)
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
+#async def login_user(user: UserIn):
     username: str | None = form_data.username
     password: str | None = form_data.password
     
@@ -49,28 +40,27 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Username and/or password incorrect"
         )    
     
-    usersFound = [u for u in users if u.username == username]
-    
-    if not usersFound:
+    userDb = get_user_by_username(username)
+    if not userDb:
         raise HTTPException(
-            status_code = status.HTTP_401_UNAUTHORIZED,
-            detail = "Username and/or password incorrect"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Username don't exists"
         )
     
-    user: UserDb = usersFound[0]
-    if not verify_password(password, user.password):
+    if not verify_password(password, userDb.password):
             raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = "Username and/or password incorrect"
-        )
+            )
     
     token = create_access_token(
         UserBase(
-            username=user.username,
-            password=user.password
+            username=form_data.username,
+            password=form_data.password
         )
     )
     return token
+    
     
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.get("/{id}/", status_code=status.HTTP_201_CREATED)
@@ -115,6 +105,8 @@ async def get_all_users():
 #Modify
 @router.put("/{id}/", status_code=status.HTTP_201_CREATED)
 async def get_user_by_name(id:int, name:str = None, username:str = None, email:str = None, tlf:str = None, password:str = None):
+    if password:
+        password = get_hash_password(password)
     user = modify_user(id, name, username, email, tlf, password)
     
     if user is None:
@@ -127,7 +119,7 @@ async def get_user_by_name(id:int, name:str = None, username:str = None, email:s
 
 #Delete
 @router.delete("/{id}")
-async def delete_user_by_id(id: int):
+async def delete_user_by_id(id: int, token: str = Depends(oauth2_scheme)):
     result = delete_user_by_id(id)
     
     if result == 0:
