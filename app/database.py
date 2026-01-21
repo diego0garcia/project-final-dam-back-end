@@ -1,7 +1,7 @@
 from app.user import UserDb
 import mariadb
 from app.user import UserDb, UserIn
-from app.studient import StudentDb, StudentIn, StudentOut
+from app.studient import StudentDb, StudentIn
 
 
 db_config = {
@@ -216,9 +216,11 @@ def get_all_studient():
                 email = row[4],
                 course = row[5],
                 )
+                
                 studients.append(studient)
                 
             return studients
+
 
 def modify_studient(id: int, nia:str = None, name:str = None, tlf:int = None, email:str = None, course:str = None):
     with mariadb.connect(**db_config) as conn:
@@ -253,3 +255,25 @@ def delete_studient_by_id(id: int):
             cursor.execute(sql, values)
             conn.commit()
             return cursor.rowcount
+        
+
+def get_student_by_username(name: str):
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = f"SELECT * FROM {studient_table} WHERE nombre = ?"
+            values = (name,)
+            cursor.execute(sql, values)
+            row = cursor.fetchone()
+            if row is None:
+                return None
+            
+            student = StudentDb(
+                id = row[0],
+                nia = row[1],
+                name = row[2],
+                tlf = row[3],
+                email = row[4],
+                course = row[5],
+            )
+            
+            return student

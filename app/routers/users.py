@@ -1,11 +1,10 @@
-from fastapi import APIRouter, status, HTTPException, Header, Depends
+from fastapi import APIRouter, status, HTTPException, Depends
 from pydantic import BaseModel
-from app.auth.auth import Token
 from fastapi.security import OAuth2PasswordRequestForm
-from app.user import UserBase,UserDb,UserIn,UserLoginIn,UserOut
+from app.user import UserBase ,UserIn, UserOut
 from app.database import UserDb
 from app.auth.auth import create_access_token, verify_password, oauth2_scheme, get_hash_password
-from app.database import insert_user, get_by_id_user, delete_user_by_id, get_all, get_user_by_username, modify_user, check_user_if_exists, get_id
+from app.database import insert_user, get_by_id_user, delete_user_by_id, get_all, get_user_by_username, modify_user, check_user_if_exists
 
 router = APIRouter(
     prefix="/users",
@@ -119,7 +118,7 @@ async def update_user(id: int, dni:str = None, name:str = None, username:str = N
     return user
 
 #Delete
-@router.delete("/{id}")
+@router.delete("/{id}/")
 async def delete_user(id: int, token: str = Depends(oauth2_scheme)):
     
     result = delete_user_by_id(id)
