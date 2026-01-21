@@ -12,11 +12,14 @@ db_config = {
     "database": "myapi"
 }
 
+user_table = "usuario"
+studient_table = "alumno"
+
 #//////////////////////////USERS//////////////////////////
 def check_user_if_exists(username:str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id FROM usuario WHERE username = ?"
+            sql = f"SELECT id FROM {user_table} WHERE username = ?"
             values = (username,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -26,10 +29,11 @@ def check_user_if_exists(username:str):
             
             return True
     
+    
 def get_id():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT count(*) FROM usuario"
+            sql = f"SELECT count(*) FROM {user_table}"
             cursor.execute(sql,)
             rows = cursor.fetchone()
             
@@ -38,7 +42,7 @@ def get_id():
 def insert_user(user: UserIn):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "Insert into usuario (dni, username, password, nombre, email, tlf) values (?, ?, ?, ?, ?, ?)"
+            sql = f"Insert into {user_table} (dni, username, password, nombre, email, tlf) values (?, ?, ?, ?, ?, ?)"
             values = (user.dni, user.username, user.password, user.name, user.email, user.tlf)
             cursor.execute(sql, values)
             conn.commit()
@@ -47,7 +51,7 @@ def insert_user(user: UserIn):
 def get_all():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM usuario"
+            sql = f"SELECT * FROM {user_table}"
             cursor.execute(sql)
             rows = cursor.fetchall()
             
@@ -70,7 +74,7 @@ def get_all():
 def get_by_id_user(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, dni, username, password, nombre, email, tlf FROM usuario WHERE id = ?"
+            sql = f"SELECT id, dni, username, password, nombre, email, tlf FROM {user_table} WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -92,7 +96,7 @@ def get_by_id_user(id: int):
 def delete_user_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "DELETE FROM usuario WHERE id = ?"
+            sql = f"DELETE FROM {user_table} WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             conn.commit()
@@ -102,7 +106,7 @@ def delete_user_by_id(id: int):
 def get_user_by_username(username: str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM usuario WHERE username = ?"
+            sql = f"SELECT * FROM {user_table} WHERE username = ?"
             values = (username,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -125,7 +129,7 @@ def modify_user(id:int, dni:str = None, name:str = None, username:str = None, em
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             
-            sql = "SELECT * FROM usuario WHERE id = ?"
+            sql = f"SELECT * FROM {user_table} WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -139,7 +143,7 @@ def modify_user(id:int, dni:str = None, name:str = None, username:str = None, em
             new_email = email if email is not None else row[4]
             new_tlf = tlf if tlf is not None else row[5]
             
-            sql = "UPDATE usuario SET dni = ?, username = ?, password = ?, nombre = ?, email = ?, tlf = ? WHERE id = ?"
+            sql = f"UPDATE {user_table} SET dni = ?, username = ?, password = ?, nombre = ?, email = ?, tlf = ? WHERE id = ?"
             values = (new_dni, new_username, new_password, new_name, new_email, new_tlf, id)
             cursor.execute(sql, values)
             conn.commit()
@@ -154,7 +158,7 @@ def modify_user(id:int, dni:str = None, name:str = None, username:str = None, em
 def check_studient_if_exists(nia:str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id FROM alumno WHERE nia = ?"
+            sql = f"SELECT id FROM {studient_table} WHERE nia = ?"
             values = (nia,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -168,7 +172,7 @@ def check_studient_if_exists(nia:str):
 def insert_studient(studient: StudentIn):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "Insert into alumno (nia, nombre, tlf, email, curso) values (?, ?, ?, ?, ?)"
+            sql = f"Insert into {studient_table} (nia, nombre, tlf, email, curso) values (?, ?, ?, ?, ?)"
             values = (studient.nia, studient.name, studient.tlf, studient.email, studient.course)
             cursor.execute(sql, values)
             conn.commit()
@@ -177,7 +181,7 @@ def insert_studient(studient: StudentIn):
 def get_by_id_studient(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT id, nia, nombre, tlf, email, curso FROM alumno WHERE id = ?"
+            sql = f"SELECT id, nia, nombre, tlf, email, curso FROM {studient_table} WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -198,7 +202,7 @@ def get_by_id_studient(id: int):
 def get_all_studient():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM alumno"
+            sql = f"SELECT * FROM {studient_table}"
             cursor.execute(sql)
             rows = cursor.fetchall()
             
@@ -220,7 +224,7 @@ def modify_studient(id: int, nia:str = None, name:str = None, tlf:int = None, em
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             
-            sql = "SELECT * FROM alumno WHERE id = ?"
+            sql = f"SELECT * FROM {studient_table} WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             row = cursor.fetchone()
@@ -233,7 +237,7 @@ def modify_studient(id: int, nia:str = None, name:str = None, tlf:int = None, em
             new_email = email if email is not None else row[3]
             new_course = course if course is not None else row[4]
             
-            sql = "UPDATE alumno SET nia = ?, name = ?, tlf = ?, email = ?, course = ? WHERE id = ?"
+            sql = f"UPDATE {studient_table} SET nia = ?, name = ?, tlf = ?, email = ?, course = ? WHERE id = ?"
             values = (new_nia, new_name, new_email, new_tlf, new_course, id)
             cursor.execute(sql, values)
             conn.commit()
@@ -244,7 +248,7 @@ def modify_studient(id: int, nia:str = None, name:str = None, tlf:int = None, em
 def delete_studient_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
-            sql = "DELETE FROM alumno WHERE id = ?"
+            sql = f"DELETE FROM {studient_table} WHERE id = ?"
             values = (id,)
             cursor.execute(sql, values)
             conn.commit()

@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS usuario(
 
 CREATE TABLE alumno(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    nia INT NOT NULL,
+    nia INT NOT NULL UNIQUE,
     nombre VARCHAR(100) NOT NULL,
     tlf INT(9) NOT NULL,
     email VARCHAR(100),
@@ -18,59 +18,58 @@ CREATE TABLE alumno(
 );
 
 CREATE TABLE IF NOT EXISTS asignatura(
-id INT PRIMARY KEY AUTO_INCREMENT,
-horas INT NOT NULL,
-curso VARCHAR(50) NOT NULL,
-nia_alumno INT(11) NOT NULL,
-CONSTRAINT fk_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia)
-);
-
-CREATE TABLE IF NOT EXISTS horario(
-id INT PRIMARY KEY AUTO_INCREMENT,
-h_inicio TIME NOT NULL,
-h_final TIME NOT NULL,
-dia DATE NOT NULL,
-id_asignatura INT NOT NULL,
-dni_usuario VARCHAR(9) NOT NULL,
-CONSTRAINT pk_horario_id_asignatura FOREIGN KEY (id_asignatura) REFERENCES asignatura(id) ON DELETE CASCADE,
-CONSTRAINT fk_matriculado_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    horas INT NOT NULL,
+    curso VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS matriculado(
-nia_alumno INT(11) NOT NULL,
-id_asignatura INT NOT NULL,
-CONSTRAINT pk_matriculado PRIMARY KEY (nia_alumno, id_asignatura),
-CONSTRAINT fk_matriculado_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia) ON DELETE CASCADE,
-CONSTRAINT fk_matriculado_id_asignatura FOREIGN KEY (id_asignatura) REFERENCES asignatura(id) ON DELETE CASCADE
+    nia_alumno INT(11) NOT NULL,
+    id_asignatura INT NOT NULL,
+    CONSTRAINT pk_matriculado PRIMARY KEY (nia_alumno, id_asignatura),
+    CONSTRAINT fk_matriculado_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia) ON DELETE CASCADE,
+    CONSTRAINT fk_matriculado_id_asignatura FOREIGN KEY (id_asignatura) REFERENCES asignatura(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS horario(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    h_inicio TIME NOT NULL,
+    h_final TIME NOT NULL,
+    dia DATE NOT NULL,
+    id_asignatura INT NOT NULL,
+    dni_usuario VARCHAR(9) NOT NULL,
+    CONSTRAINT pk_horario_id_asignatura FOREIGN KEY (id_asignatura) REFERENCES asignatura(id) ON DELETE CASCADE,
+    CONSTRAINT fk_matriculado_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS root(
-dni_usuario VARCHAR(9) NOT NULL PRIMARY KEY,
-CONSTRAINT fk_root_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE
+    dni_usuario VARCHAR(9) NOT NULL PRIMARY KEY,
+    CONSTRAINT fk_root_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS expediente(
-id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-nia_alumno INT(11) NOT NULL,
-accion VARCHAR(500) NOT NULL,
-resultado VARCHAR(500) NOT NULL,
-CONSTRAINT fk_expediente_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia) ON DELETE CASCADE
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    nia_alumno INT(11) NOT NULL,
+    accion VARCHAR(500) NOT NULL,
+    resultado VARCHAR(500) NOT NULL,
+    CONSTRAINT fk_expediente_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS notificacion(
-id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-nia_alumno INT NOT NULL,
-dni_usuario VARCHAR(9) NOT NULL,
-descripcion VARCHAR(500) NOT NULL,
-hora DATETIME NOT NULL,
-CONSTRAINT fk_notificacion_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia) ON DELETE CASCADE,
-CONSTRAINT fk_notificacion_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    nia_alumno INT NOT NULL,
+    dni_usuario VARCHAR(9) NOT NULL,
+    descripcion VARCHAR(500) NOT NULL,
+    hora DATETIME NOT NULL,
+    CONSTRAINT fk_notificacion_nia_alumno FOREIGN KEY (nia_alumno) REFERENCES alumno(nia) ON DELETE CASCADE,
+    CONSTRAINT fk_notificacion_dni_usuario FOREIGN KEY (dni_usuario) REFERENCES usuario(dni) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS amonestacion(
-id_notificacion INT NOT NULL PRIMARY KEY,
-descripcion VARCHAR(500) NOT NULL,
-CONSTRAINT fk_amonestacion_id_notificacion FOREIGN KEY (id_notificacion) REFERENCES notificacion(id) ON DELETE CASCADE
+    id_notificacion INT NOT NULL PRIMARY KEY,
+    descripcion VARCHAR(500) NOT NULL,
+    CONSTRAINT fk_amonestacion_id_notificacion FOREIGN KEY (id_notificacion) REFERENCES notificacion(id) ON DELETE CASCADE
 );
 
 CREATE TABLE profesor(
