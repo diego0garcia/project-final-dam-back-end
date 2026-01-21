@@ -1,20 +1,16 @@
 from fastapi import APIRouter, status, HTTPException, Depends
-#from pydantic import BaseModel
-#from app.auth.auth import Token
-#from fastapi.security import OAuth2PasswordRequestForm
-from app.studient import StudentIn, StudentDb, StudentOut
+from app.studient import StudentIn, StudentOut
 from app.auth.auth import oauth2_scheme
-from app.database import insert_studient, check_studient_if_exists, get_by_id_studient, get_user_by_username, get_all_studient, modify_studient, delete_studient_by_id
+from app.database import insert_studient, check_studient_if_exists, get_by_id_studient, get_student_by_username, get_all_studient, modify_studient, delete_studient_by_id
 
 router = APIRouter(
-    prefix="/studients",
-    tags=["Studients"] #Esto es para la documentacion
+    prefix="/students",
+    tags=["Students"] #Esto es para la documentacion
 )   
 
-#Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(studientIn: StudentIn):
-    
     if check_studient_if_exists(studientIn.nia):
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
@@ -24,7 +20,6 @@ async def create_user(studientIn: StudentIn):
     insert_studient(studientIn)
 
 
-#Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.get("/{id}/", status_code=status.HTTP_201_CREATED)
 async def get_studient_by_id(id: int):
     studient = get_by_id_studient(id)
@@ -37,21 +32,21 @@ async def get_studient_by_id(id: int):
     
     return studient
 
+
 @router.get("/username/{username}/", status_code=status.HTTP_201_CREATED)
 async def get_user_by_name(username: str):
-    user = get_user_by_username(username)
+    student = get_student_by_username(username)
     
-    if user is None:
+    if student is None:
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
-            detail = "User not already exists"
+            detail = "Student not already exists"
         )
     
-    return user
+    return student
 
 
 @router.get("/",response_model=list[StudentOut],status_code=status.HTTP_200_OK)
-#async def get_all_users(token: str = Depends(oauth2_scheme)):#authorization: str | None = Header()):
 async def get_all_studients():
     studients = []
     studients = get_all_studient()
@@ -64,33 +59,30 @@ async def get_all_studients():
     
     return studients
 
+
 #Modify
 @router.put("/{id}/", status_code=status.HTTP_200_OK)
-async def update_studient(id: int, nia:str = None, name:str = None, tlf:int = None, email:str = None, course:str = None):
-    
-    
+async def update_studient(id: int, nia:str = None, name:str = None, tlf:int = None, email:str = None, course:str = None):    
     studient = modify_studient(id, nia, name, tlf, email, course)
     
     if studient is None:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
-            detail = "Studient not found"
+            detail = "Student not found"
         )
     
     return studient
 
+
 #Delete
-@router.delete("/{id}")
+@router.delete("/{id}/")
 async def delete_studient(id: int, token: str = Depends(oauth2_scheme)):
-    
     result = delete_studient_by_id(id)
     
     if result == 0:
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
-            detail = "User not already exists"
+            detail = "Student not already exists"
         )
     
     return result
-
-#User if is superadmin can create other user
