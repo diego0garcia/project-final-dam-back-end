@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS usuario(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    dni VARCHAR(9) NOT NULL,
+    dni VARCHAR(9) NOT NULL UNIQUE,
     username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
     nombre VARCHAR(100) NOT NULL,
@@ -9,12 +9,12 @@ CREATE TABLE IF NOT EXISTS usuario(
 );
 
 CREATE TABLE alumno(
+    id INT PRIMARY KEY AUTO_INCREMENT,
     nia INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     tlf INT(9) NOT NULL,
     gmail VARCHAR(100),
-    curso VARCHAR(50),
-    PRIMARY KEY (nia)
+    curso VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS asignatura(
