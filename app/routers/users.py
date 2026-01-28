@@ -1,24 +1,23 @@
-from fastapi import APIRouter, status, HTTPException, Header, Depends
+from fastapi import APIRouter, status, HTTPException, Depends
 from pydantic import BaseModel
-from app.auth.auth import Token
 from fastapi.security import OAuth2PasswordRequestForm
-from app.models import UserBase,UserDb,UserIn,UserLoginIn,UserOut
+from app.user import UserBase ,UserIn, UserOut
 from app.database import UserDb
 from app.auth.auth import create_access_token, verify_password, oauth2_scheme, get_hash_password
-from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user, check_if_exists, get_id
+from app.database import insert_user, get_by_id_user, delete_user_by_id, get_all, get_user_by_username, modify_user, check_user_if_exists
 
 router = APIRouter(
     prefix="/users",
     tags=["Users"] #Esto es para la documentacion
 )   
 
-users: list[UserDb] = []
+#users: list[UserDb] = []
 
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.post("/signup/", status_code=status.HTTP_201_CREATED)
 async def sign_up_user(userIn: UserIn):
     
-    if check_if_exists(userIn.username):
+    if check_user_if_exists(userIn.username):
         raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
             detail = "Username already exists"
@@ -65,7 +64,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 #Cuando accedas a /users/signup/ se ejecuta el seguiente metodo (created_user)
 @router.get("/{id}/", status_code=status.HTTP_201_CREATED)
 async def get_user_by_id(id: int):
-    user = get_by_id(id)
+    user = get_by_id_user(id)
     
     if user is None:
         raise HTTPException(
@@ -119,7 +118,7 @@ async def update_user(id: int, dni:str = None, name:str = None, username:str = N
     return user
 
 #Delete
-@router.delete("/{id}")
+@router.delete("/{id}/")
 async def delete_user(id: int, token: str = Depends(oauth2_scheme)):
     
     result = delete_user_by_id(id)

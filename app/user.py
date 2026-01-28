@@ -28,3 +28,6 @@ class UserOut(BaseModel):
 #Es como un alias de UserBase pq esta vacio
 class UserLoginIn(UserBase):
     pass
+
+
+
