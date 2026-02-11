@@ -1,7 +1,7 @@
 from pydantic import BaseModel
     
 class StudentIn(BaseModel):
-    nia: str
+    nia: int
     name: str
     tlf: int
     email: str

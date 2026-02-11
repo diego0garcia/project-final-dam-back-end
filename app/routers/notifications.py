@@ -4,13 +4,13 @@ from app.auth.auth import Token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import UserDb, delete_notification_by_id, insert_notification, modify_notification, get_all_notification
 from app.auth.auth import create_access_token, verify_password, oauth2_scheme, get_hash_password
-from app.database import insert_user, get_by_id, delete_user_by_id, get_all, get_user_by_username, modify_user, check_if_exists, get_id
+from app.database import insert_user,get_notification_id, delete_user_by_id, get_all, get_user_by_username, modify_user, check_if_exists, get_id
 from app.notification import NotificationDb, NotificationIn, NotificationOut
 from app.routers import users
 
 router = APIRouter(
     prefix="/notifications",
-    tags=["Notifications"] #Esto es para la documentacion
+    tags=["Notifications"]
 )   
 
 notifications: list[NotificationDb] = []
@@ -65,8 +65,8 @@ async def delete_notification(id: int, token: str = Depends(oauth2_scheme)):
     return result
 
 @router.get("/{id}/", status_code=status.HTTP_201_CREATED)
-async def get_user_by_notification(id: int):
-    notification = get_by_id(id)
+async def get_notification_by_id(id: int):
+    notification = get_notification_id(id)
     
     if notification is None:
         raise HTTPException(

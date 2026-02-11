@@ -1,11 +1,8 @@
 
-from app.notification import NotificationIn, NotificationOut
-from app.models import UserDb, UserIn
-from app.notification import NotificationDb, NotificationIn
-from app.user import UserDb
-import mariadb
+from app.notification import NotificationIn, NotificationOut, NotificationDb
 from app.user import UserDb, UserIn
 from app.studient import StudentDb, StudentIn
+import mariadb
 
 
 db_config = {
@@ -32,6 +29,11 @@ def check_user_if_exists(username:str):
                 return False
             
             return True
+
+
+def check_if_exists(username: str):
+    """Compatibility wrapper: routers expect `check_if_exists`."""
+    return check_user_if_exists(username)
     
     
 def get_id():
@@ -155,7 +157,44 @@ def modify_user(id:int, dni:str = None, name:str = None, username:str = None, em
             return get_by_id_user(id)
             
 #--------------------------------NOTIFICATIONS-------------------------------------#
+def delete_notification_by_id(id: int):
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            sql = "DELETE FROM notificacion WHERE id = ?"
+            values = (id,)
+            cursor.execute(sql, values)
+            conn.commit()
+            return cursor.rowcount
+               
 
+def modify_notification(id:int, nia_alumno: str = None, dni_usuario: str = None, descripcion: str = None, hora: str = None):
+    with mariadb.connect(**db_config) as conn:
+        with conn.cursor() as cursor:
+            
+            sql = "SELECT id, nia_alumno, dni_usuario, descripcion, hora FROM notificacion WHERE id = ?"
+            values = (id,)
+            cursor.execute(sql, values)
+            row = cursor.fetchone()
+
+
+            new_nia_alumno = nia_alumno if nia_alumno is not None else cur_nia_alumno
+            new_dni_usuario = dni_usuario if dni_usuario is not None else cur_dni_usuario
+            new_descripcion = descripcion if descripcion is not None else cur_descripcion
+            new_hora = hora if hora is not None else cur_hora
+
+            sql = "UPDATE notificacion SET nia_alumno = ?, dni_usuario = ?, descripcion = ?, hora = ? WHERE id = ?"
+            values = (new_nia_alumno, new_dni_usuario, new_descripcion, new_hora, id)
+            cursor.execute(sql, values)
+            conn.commit()
+
+            # return updated notification
+            return NotificationOut(
+                id = id,
+                nia_alumno = new_nia_alumno,
+                dni_usuario = new_dni_usuario,
+                descripcion = new_descripcion,
+                hora = new_hora
+            )
     
 def get_id():
     with mariadb.connect(**db_config) as conn:
@@ -199,11 +238,30 @@ def get_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
             sql = "SELECT id, nia_alumno, dni_usuario, descripcion, hora FROM notificacion WHERE id = ?"
+            values = (id,)
+            cursor.execute(sql, values)
+            row = cursor.fetchone()
+            if row is None:
+                return None
+
+            notification = NotificationOut(
+                id = row[0],
+                nia_alumno = row[1],
+                dni_usuario = row[2],
+                descripcion = row[3],
+                hora = row[4]
+            )
+            return notification
+
+def get_notification_id(id: int):
+    """Compatibility function expected by routers: get notification by id."""
+    return get_by_id(id)
                   
 #users: list[UserDb] = [UserDb(id=1,name="Alice",username="alice",email="alice@gmail.com",tlf=7658364593,password="$2b$12$9DAIvp9W0ls6hY3mE.x.5elr0VsUgOpkFpQ3rp/4XOTPAckgaWztu"),UserDb(id=2,name="Bob",username="bob",email="alice@gmail.com",tlf=7658364593,password="$2b$12$qs8F6B3JpINiXDAjhN6cYe9zTuHAE2xoeQ8NNvFtpCzIjg.iFzq3C")]
 #users: list[UserDb] = [UserDb(id=1, name="alice", username="alice", email="juan@gmail.com", tlf=687678899, password="$2b$12$CUgVgUwbXO9EuBm2FbTLie2aY/blRe6zuT0bEP40gL8NTSz3YYv.2")]
 
 #//////////////////////////STUDIENTS//////////////////////////
+#2
 def check_studient_if_exists(nia:str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
@@ -226,7 +284,7 @@ def insert_studient(studient: StudentIn):
             cursor.execute(sql, values)
             conn.commit()
            
-            
+         #1   
 def get_by_id_studient(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
@@ -237,43 +295,19 @@ def get_by_id_studient(id: int):
             if row is None:
                 return None
 
-            notification = NotificationDb(
-                id = row[0],
-                nia_alumno = row[1],
-                dni_usuario = row[2],
-                descripcion = row[3],
-                hora = row[4]
-            )
-            return notification
-        return None
-    
-def delete_notification_by_id(id: int):
-    with mariadb.connect(**db_config) as conn:
-        with conn.cursor() as cursor:
-            sql = "DELETE FROM notificacion WHERE id = ?"
-            values = (id,)
-            cursor.execute(sql, values)
-            conn.commit()
-            return cursor.rowcount
-               
-
-def modify_notification(id:int, nia_alumno: str = None, dni_usuario: str = None, descripcion: str = None, hora: str = None):
-    with mariadb.connect(**db_config) as conn:
-        with conn.cursor() as cursor:
-            
-            sql = "SELECT * FROM notificacion WHERE id = ?"
-            
             studient = StudentDb(
                 id = row[0],
                 nia = row[1],
                 name = row[2],
                 tlf = row[3],
                 email = row[4],
-                course = row[5],
+                course = row[5]
             )
             return studient
-
     
+
+
+    #4
 def get_all_studient():
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
@@ -296,7 +330,7 @@ def get_all_studient():
                 
             return studients
 
-
+#5
 def modify_studient(id: int, nia:str = None, name:str = None, tlf:int = None, email:str = None, course:str = None):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
@@ -321,7 +355,7 @@ def modify_studient(id: int, nia:str = None, name:str = None, tlf:int = None, em
             
             return get_by_id_studient(id)
         
-
+#6
 def delete_studient_by_id(id: int):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:
@@ -331,7 +365,7 @@ def delete_studient_by_id(id: int):
             conn.commit()
             return cursor.rowcount
         
-
+#3
 def get_student_by_username(name: str):
     with mariadb.connect(**db_config) as conn:
         with conn.cursor() as cursor:

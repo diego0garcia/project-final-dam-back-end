@@ -33,9 +33,9 @@ async def get_studient_by_id(id: int):
     return studient
 
 
-@router.get("/username/{username}/", status_code=status.HTTP_201_CREATED)
-async def get_user_by_name(username: str):
-    student = get_student_by_username(username)
+@router.get("/username/{name}/", status_code=status.HTTP_201_CREATED)
+async def get_user_by_name(name: str):
+    student = get_student_by_username(name)
     
     if student is None:
         raise HTTPException(
@@ -50,7 +50,7 @@ async def get_user_by_name(username: str):
 async def get_all_studients():
     studients = []
     studients = get_all_studient()
-     
+    
     if not studients:
         raise HTTPException(
           status_code=status.HTTP_403_FORBIDDEN,
